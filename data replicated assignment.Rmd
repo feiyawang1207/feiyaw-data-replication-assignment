@@ -56,9 +56,10 @@ Overnight fasting blood and urine samples were obtained between 08:00 and 09:30 
 
 Initial data management used Foxpro 6.0 program to create a data file for each data set; the final data analysis was performed using SAS 6.12(SAS Institute, Cary, NC) on a Windows computer.
 The statistic methods including:
-* Anova
-* post-hoc test using Tukey’s method
-* Covariate analysis and partial correlation
+* ANOVA
+* Post-hoc test using Tukey’s method
+* ANCOVA--Covariate analysis
+* Partial correlation test
 
 The signifcant level is 0.05 for all the tests.
 
@@ -73,7 +74,7 @@ I trasfer the `.SD2` files into `.csv` file since R package can directly deal wi
 
 ```{r}
 library (curl)
-library(DT)
+library(knitr)
 #install package curl before this step to load a file from server.  
 
 f <- curl("https://raw.githubusercontent.com/feiyawang1207/feiyaw-data-replication-assignment/master/W0716.csv")
@@ -82,13 +83,13 @@ f <- curl("https://raw.githubusercontent.com/feiyawang1207/feiyaw-data-replicati
 d <- read.csv(f, header = TRUE, sep = ",", stringsAsFactors = FALSE)
 #read the .cvs file as a data frame in variable d.
 
-head(d)
+kable(head(d))
 #show the top 6 rows of the data frame. 
 ```
 
 ### b. sperate data frame from groups and check the number of subjects in each group
 
-Among those subjects meets the requirement, 77 were diagnosed as osteoporosis, 137 participants located in osteopenic group; 110 were identified as normal bone mass group. The dataset have a column of OP to seperate those patients. 1 is for Osteoporosis group, 2 is osteopenic group, 3 is normal bone group.
+Among those subjects meets the requirement, 77 were diagnosed as osteoporosis(OS), 137 participants located in osteopenic group(OC); 110 were identified as normal bone mass group(NM). The dataset have a column of OP to seperate those patients. 1 is for Osteoporosis group, 2 is osteopenic group, 3 is normal bone group.
 
 I use Filter() in `dplyr` package to seperate those groups
 
@@ -112,11 +113,237 @@ dim(NM)[1]
 
 ```
 
-## 3.2 Anova
 
-According to Table 1, we test some of ANOVA results. including age, BMI, Hypertension, and BMD for neck(orginal and t score).
+## 3.2 ANOVA test
 
-![Table 1](https://github.com/feiyawang1207/feiyaw-data-replication-assignment/blob/master/Table%201.jpg)
+According to Table 1,2. We test some of variables ANOVA results, including age, BMI, sMg, sCa, serum phosphurs(sP), Ca*P. since those results mentions in paper text.
+
+Since each group have different numbers of subject, We create a data frame that can combine the columns from those three group.
+```{r}
+Data <- data.frame(
+       Y=c(OS$AGE, OC$AGE, NM$AGE),
+       #combine the data of three column
+       Site =factor(rep(c("OS", "OC", "NM"), times=c(length(OS$AGE), length(OC$AGE), length(NM$AGE)))
+       ))
+
+head(Data)
+```
+
+With this data frame, we can apply anova test
+```{r}
+fm <- aov(Y~Site, data=Data)
+result_age<- anova(fm)
+result_age
+```
+Therefore, the p value is
+```{r}
+result_age["Pr(>F)"][[1]][1]
+```
+We can also view the result by Boxplot.
+```{r}
+plot(data = Data, Y ~ Site,xlab="Groups", ylab="Ages")  # boxplot with medians
+means <- summarise(group_by(Data, Site), mean(Y))  # calculate average by group
+points(1:3, means$`mean(Y)`, pch = 3, cex = 1.5) 
+
+```
+
+We can write a function Anova() to produce the anova test for other variable. 
+```{r}
+Anovatest<-function(x1,x2,x3){
+  # fucntion for anova for three group
+  Data <- data.frame(
+       Y=c(x1, x2, x3),
+       #combine the data of three column
+       Site =factor(rep(c("OS", "OC", "NM"), times=c(length(x1), length(x2), length(x3)))
+       ))
+
+fm <- aov(Y~Site, data=Data)
+anova(fm)
+
+}
+
+x<-Anovatest(OS$AGE,OC$AGE,NM$AGE)
+#get the Anova test results
+
+x
+
+p<-x["Pr(>F)"][[1]][1]
+p
+# p value
+```
+
+Therefore, for BMI, we have:
+```{r}
+x1<-Anovatest(OS$BMI,OC$BMI,NM$BMI)
+#BMI
+x1
+#anova summary
+x1
+
+p1<-x1["Pr(>F)"][[1]][1]
+#store p value
+p1
+
+```
+Since both p values is less than 0.05, the ages and BMI among different group do have significant difference.
+
+It is same with the paper 
+
+>There was significant difference in age, height, weight, BMI among three groups.(Wang, 2005).
+
+![](https://raw.githubusercontent.com/feiyawang1207/feiyaw-data-replication-assignment/master/Table%201.jpg)
+
+
+
+For sMg, sCa, sP, and Ca*p, we can produce
+```{r}
+x2<-Anovatest(OS$MAGNESIU,OC$MAGNESIU,NM$MAGNESIU)
+#sMg
+x3<-Anovatest(OS$CALCIUM,OC$CALCIUM,NM$CALCIUM)
+#sCa
+x4<-Anovatest(OS$PHOSPHOR,OC$PHOSPHOR,NM$PHOSPHOR)
+#sP
+x5<-Anovatest(OS$PHOSPHOR*OS$CALCIUM,OC$PHOSPHOR*OC$CALCIUM,NM$PHOSPHOR*NM$CALCIUM)
+#Ca*p
+
+x2
+#sMg
+p2<-x2["Pr(>F)"][[1]][1]
+
+x3
+#sCa
+p3<-x3["Pr(>F)"][[1]][1]
+
+x4
+#sP
+p4<-x4["Pr(>F)"][[1]][1]
+
+
+x5
+#Ca*P
+p5<-x5["Pr(>F)"][[1]][1]
+
+```
+For p values:
+```{r}
+table1<-cbind(p2,p3,p4,p5)
+#create table for p values
+colnames(table1)<-c("sMg","sCa","sP","Ca*P")
+#name cloumn
+
+table1
+```
+According to table 2 and it text, the conclusion is matched to paper.
+
+>sMg level in OP group (0.91±0.11 mmol/L) was significantly higher than in the osteopenia (0.88±0.09 mmol/L) and normal
+(0.87±0.08 mmol/L) groups (p=0.02). In addition, the level of the product of calcium and phosphorus was lower in OP group but did not reach statistical significance (p=0.06). Interestingly, the total serum level of both Ca and Mg, the two bivalent cations, is very similar among three groups.(Wang,2005)
+
+
+## 3.3 post-hoc test using Tukey’s method
+Accodring to table 2, the sMg should show significant different between both OS and NM, OC and NM. 
+Another varibale Ca/Mg only shows a signifcant difference between OS and NM.
+
+
+Let's do SMg first 
+```{r}
+Data1 <- data.frame(
+       Y=c(OS$MAGNESIU, OC$MAGNESIU, NM$MAGNESIU),
+       Site =factor(rep(c("OS", "OC", "NM"), times=c(length(OS$MAGNESIU), length(OC$MAGNESIU), length(NM$MAGNESIU)))
+       ))
+#create dat frame like previous
+
+fm <- aov(Y~Site, data=Data)
+# make it into aov format so TUKEYHSD can apply on.
+
+TUKEY1 <- TukeyHSD(x=fm, 'Site', conf.level=0.95)
+#Conduct Tukey's Method
+
+TUKEY1
+```
+It shows 0.029 for OS-NM and 0.048 for OS-OC, both p values are less than 0.05, proves that there are significant difference of sMg between OS group with OC groups and NM group, which matches the table annotation. 
+
+A boxplot can also gives a hint:
+```{r}
+plot(data = Data1, Y ~ Site,xlab="Groups", ylab="Serum Magnesium Concentration(mmol/L)")  # boxplot with medians
+means <- summarise(group_by(Data1, Site), mean(Y))  # calculate average by group
+points(1:3, means$`mean(Y)`, pch = 3, cex = 1.5) 
+
+```
+
+
+For Ca/Mg:
+```{r}
+Data2 <- data.frame(
+       Y=c(OS$CALCIUM/OS$MAGNESIU,OC$CALCIUM/OC$MAGNESIU, NM$CALCIUM/NM$MAGNESIU),
+       Site =factor(rep(c("OS", "OC", "NM"), times=c(length(OS$MAGNESIU), length(OC$MAGNESIU), length(NM$MAGNESIU)))
+       ))
+#create dat frame like previous
+
+fm2 <- aov(Y~Site, data=Data2)
+# make it into aov format so TUKEYHSD can apply on.
+
+TUKEY2 <- TukeyHSD(x=fm2, 'Site', conf.level=0.95)
+#Conduct Tukey's Method
+
+TUKEY2
+```
+It shows 0.032 for OS-NM, p values are less than 0.05.Other p values are larger than 0.05. It proves that there are significant difference of Ca/Mg between OS group with NM group only, which matches the table annotation. 
+
+We coudl draw a boxplot as well.
+```{r}
+plot(data = Data2, Y ~ Site,xlab="Groups", ylab="sCa / sMg")  # boxplot with medians
+means <- summarise(group_by(Data2, Site), mean(Y))  # calculate average by group
+points(1:3, means$`mean(Y)`, pch = 3, cex = 1.5) 
+
+```
+
+## 3.4 ANCOVA
+
+In paper, it said:
+
+>Covariate analysis, in which sMg value was taken as the dependent variable, revealed a significant relationship between sMg and sCa(Wang, 2005).
+
+Therefore, we are applying ANCOVA use sCa as the predictor variable and sMg as the response variable.
+```{r}
+
+data3 <- d[,c("OP","CALCIUM","MAGNESIU","AGE","BMI")]
+data3$OP<-as.factor(data3$OP)
+str(data3)
+
+```
+
+
+
+```{r}
+library(ggplot2)
+library(gridExtra)
+library(car)
+
+m <- lm(data = data3, AGE~MAGNESIU + OP + MAGNESIU:OP)
+
+summary(m)
+
+m$coeff
+
+anova(m)
+
+```
+
+## 3.5 Partial correlation 
+In the overall group, correlation studies revealed a significant negative correlation between sMg and sCa (r=–0.166, p=0.003), and when stratifying by group, only correlation between sMg and sCa in patients with
+osteoporosis was statistically significant (r=–0.240, p=0.038).
+
+```{r}
+library(ppcor)
+c1<-pcor.test(OS$CALCIUM, OS$MAGNESIU, OS$AGE*OS$BMI)
+c2<-pcor.test(OC$CALCIUM, OC$MAGNESIU, OC$AGE*OC$BMI)
+c3<-pcor.test(NM$CALCIUM, NM$MAGNESIU, NM$AGE*NM$BMI)
+c4<-pcor.test(d$CALCIUM, d$MAGNESIU, d$AGE*d$BMI)
+c<-rbind(c1,c2,c3,c4)
+c
+```
+
+
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)

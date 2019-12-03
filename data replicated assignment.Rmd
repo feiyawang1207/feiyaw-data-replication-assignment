@@ -1,0 +1,124 @@
+---
+title: "Data_replicated_assignment"
+author: "Feiya Wang"
+date: "12/3/2019"
+output: 
+    html_document:
+      theme: paper
+      toc: true
+      toc_float: true
+      
+---
+***
+
+# **Data Replicated Assignment**
+
+***
+Introduction: This is the code for [Data replicated assignment](https://fuzzyatelin.github.io/bioanth-stats/data-reanalysis-assignment.html), as a individual final project. I use my dad Dr.Shaohai Wang's paper.
+
+Shaohai,W. Shouiqin, L. Yuanzheng, Z. *Change of Total contents of Serum Magnesium in Elderly Chinese Women with Osteoporosis*, Biological Trace Element Research. April 2005. [link to paper](https://github.com/feiyawang1207/feiyaw-data-replication-assignment/blob/master/Wang_223_231.pdf)
+
+***
+
+# 1.Introduction
+
+Osteoporosis is a disease in which bone weakening increases the risk of a broken bone.It is the most common reason for a broken bone among the elderly.
+
+![](https://www.mayoclinic.org/-/media/kcms/gbs/patient-consumer/images/2013/08/26/10/55/ds00128_im02980_mcdc7_osteoporosis-_comparethu_jpg.jpg)
+
+Osteoporosis is developed as a consequence of an imbalance of mineral element metabolism in bone, such as calcium (Ca), phosphorus (P), and magnesium (Mg). Those elements are finely regulated through storage in the bone, excretion from kidney, and absorption in the intestine, among which bone exerts one of its functions to maintain Ca homeostasis by remodeling. 
+
+Postmenopausal osteoporosis of elderly women, induced presumably by both loss of estrogen and advancing age, is a serious problem for gynecoloy. Most of the research focus on Serum Calcium(sCa). Less research, however, focused on the role of Mg, another essentiaelement for bone mineralization, to bone health, even a possible role of Mg in therapy for osteoporosis. Therefore, the research goal of Dr.Wang's paper is to explore whether the serum levels of magnesium (Mg)
+and calcium (Ca) differ between osteoporotic and nonosteoporotic elderly Chinese women.
+
+
+# 2. Method
+
+## 2.1 Subject
+
+Participants for this cross-sectional analysis were recruited from a community-based population in Beijing, P. R. China, by the way of local media, poster, and health lecture between September 2002 and March 2003. To be eligible for participation, women had to be Chinese residents in Beijing and over 65 yr of age, to be ambulatory without hip replacement, and to be in good general health. The research include 324 subjects in total.
+
+## 2.2 Measurement 
+
+### a. General body measurement
+
+participants were requested to complete a self-made questionnaire that includes a general medical and social history, reproductive history, and menopause time.Height, weight and BMI are also measured.
+
+### b. Bone Mineral Density (BMD) Measurements
+
+BMD at the left femur region was assessed with posteroanterior projection, using standard techniques from dual-energy X-ray absorptiometry (Lunar Prodigy scanner, Lunar, Madison, WI).
+
+### c. Biochemical Measurements(sCA, sMg, etc)
+
+Overnight fasting blood and urine samples were obtained between 08:00 and 09:30 in the morning from all subjects at the same day before the questionnaire was completed.
+
+## 2.3 Statistic analysis method
+
+Initial data management used Foxpro 6.0 program to create a data file for each data set; the final data analysis was performed using SAS 6.12(SAS Institute, Cary, NC) on a Windows computer.
+The statistic methods including:
+* Anova
+* post-hoc test using Tukey’s method
+* Covariate analysis and partial correlation
+
+The signifcant level is 0.05 for all the tests.
+
+
+# 3. Data Analysis
+
+## 3.1 Loading the dataset
+
+### a. load the file
+
+I trasfer the `.SD2` files into `.csv` file since R package can directly deal with `.ssd` or `.sas7bdat`. `.sd2`is an old version. The R help suggest that I could use SAS Sytem Viewer to export the file in `.csv` format. 
+
+```{r}
+library (curl)
+library(DT)
+#install package curl before this step to load a file from server.  
+
+f <- curl("https://raw.githubusercontent.com/feiyawang1207/feiyaw-data-replication-assignment/master/W0716.csv")
+#load the file to the variable f
+
+d <- read.csv(f, header = TRUE, sep = ",", stringsAsFactors = FALSE)
+#read the .cvs file as a data frame in variable d.
+
+head(d)
+#show the top 6 rows of the data frame. 
+```
+
+### b. sperate data frame from groups and check the number of subjects in each group
+
+Among those subjects meets the requirement, 77 were diagnosed as osteoporosis, 137 participants located in osteopenic group; 110 were identified as normal bone mass group. The dataset have a column of OP to seperate those patients. 1 is for Osteoporosis group, 2 is osteopenic group, 3 is normal bone group.
+
+I use Filter() in `dplyr` package to seperate those groups
+
+```{r}
+library(dplyr)
+
+OS<-filter(d, OP == 1 )
+#new variable to store the data frame of only Osteoporosis people.
+dim(OS)[1]
+# number of subject in Osteoporosis group
+
+OC<-filter(d, OP == 2 )
+#new variable to store the data frame of only Osteopenic people.
+dim(OC)[1]
+# number of subject in Osteopenic group
+
+NM<-filter(d, OP == 3 )
+# new variable to store the data frame of Normal Bone Mass group
+dim(NM)[1]
+# number of subject in Normal Bone Mass group
+
+```
+
+## 3.2 Anova
+
+According to Table 1, we test some of ANOVA results. including age, BMI, Hypertension, and BMD for neck(orginal and t score).
+
+![Table 1](https://github.com/feiyawang1207/feiyaw-data-replication-assignment/blob/master/Table%201.jpg)
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+

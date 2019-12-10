@@ -1538,7 +1538,7 @@ div.tocify {
 <div id="data-replicated-assignment" class="section level1">
 <h1><strong>Data Replicated Assignment</strong></h1>
 <hr />
-<p>Introduction: This is the code for <a href="https://fuzzyatelin.github.io/bioanth-stats/data-reanalysis-assignment.html">Data replicated assignment</a>, as a individual final project. I use my dad Dr.Shaohai Wang’s paper.</p>
+<p>Instruction: This is the code for <a href="https://fuzzyatelin.github.io/bioanth-stats/data-reanalysis-assignment.html">Data replicated assignment</a>, as a individual final project. I use my dad Dr.Shaohai Wang’s paper.</p>
 <p>Shaohai,W. Shouiqin, L. Yuanzheng, Z. <em>Change of Total contents of Serum Magnesium in Elderly Chinese Women with Osteoporosis</em>, Biological Trace Element Research. April 2005. <a href="https://github.com/feiyawang1207/feiyaw-data-replication-assignment/blob/master/Wang_223_231.pdf">link to paper</a></p>
 <hr />
 </div>
@@ -2851,7 +2851,7 @@ car::Anova(m2,type=&quot;2&quot;)</code></pre>
 <blockquote>
 <p>When sCa level was also considered, the difference of sMg was not significant among groups (F=2.09, p=0.126), age (F=0.23, p=0.636), and BMI(F=2.29, p=0.131), while sCa showed significance (F=8.23, p=0.004).</p>
 </blockquote>
-<pre class="r"><code>m3 &lt;- aov(data = data3, log(MAGNESIU)~ AGE*BMI+OP+ CALCIUM)
+<pre class="r"><code>m3 &lt;- lm(data = data3, log(MAGNESIU)~ AGE*BMI+OP+ CALCIUM)
 car::Anova(m3,type=&quot;2&quot;)</code></pre>
 <pre><code>## Anova Table (Type II tests)
 ## 
@@ -2929,10 +2929,13 @@ kable(c)</code></pre>
 </div>
 <div id="conclusion" class="section level1">
 <h1>4. Conclusion</h1>
-<p>The paper’s conclusion is that &gt;High content of sMg and potentially low content of sCa could be a feature of the serum profile of elderly Chinese women with OP, the clinical significance of which needs further elucidation. Supplementation of Mg for elderly Chinese women with OP did not appear to be necessary (Wang et al, 2005).</p>
+<p>The paper’s conclusion is that</p>
+<blockquote>
+<p>High content of sMg and potentially low content of sCa could be a feature of the serum profile of elderly Chinese women with OP, the clinical significance of which needs further elucidation. Supplementation of Mg for elderly Chinese women with OP did not appear to be necessary (Wang et al, 2005).</p>
+</blockquote>
 <p>According to our replicate statistic tests, the statistic in this paper is accurate, match to their original data set.</p>
 <p>For ANOVA and post-hoc test, the replicated results is the same with the paper statistic in text and tables.</p>
-<p>For the different F scores in ANCOVA, the data of sMg and sCa are not normally distributed. we use log() but the authors may use differnwet methods to make the data normally distributed. Also, the ANCOVA have different types, the authors may use different type of algorithm for ANCOVA. It may also because that author use other models(we use linear model in replicated assignment). Since it is 14 years ago, the author(my father) cannnot recall the memory of doing statistic.</p>
+<p>For the different F scores in ANCOVA, the data of sMg and sCa are not normally distributed. we use log() but the authors may use different methods to make the data normally distributed. Also, the ANCOVA have different types, the authors may use different type of algorithm for ANCOVA. It may also because that author use other models(we use linear model in replicated assignment). Since it is 14 years ago, the author(my father) cannnot recall the memory of doing statistic.</p>
 <p>For the slight different in Partial Correlation, the reason may because thepaper use SAS software to analysis all the statistic test. The Algorithm between R and SAS might have slightly difference. Also, the paper didn’t states which model and which type of partial correlation test they use, which can also cause the difference in our results.</p>
 </div>
 

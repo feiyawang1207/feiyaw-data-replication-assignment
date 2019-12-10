@@ -14,7 +14,7 @@ output:
 # **Data Replicated Assignment**
 
 ***
-Introduction: This is the code for [Data replicated assignment](https://fuzzyatelin.github.io/bioanth-stats/data-reanalysis-assignment.html), as a individual final project. I use my dad Dr.Shaohai Wang's paper.
+Instruction: This is the code for [Data replicated assignment](https://fuzzyatelin.github.io/bioanth-stats/data-reanalysis-assignment.html), as a individual final project. I use my dad Dr.Shaohai Wang's paper.
 
 Shaohai,W. Shouiqin, L. Yuanzheng, Z. *Change of Total contents of Serum Magnesium in Elderly Chinese Women with Osteoporosis*, Biological Trace Element Research. April 2005. [link to paper](https://github.com/feiyawang1207/feiyaw-data-replication-assignment/blob/master/Wang_223_231.pdf)
 
@@ -362,7 +362,7 @@ Although the F score do have a slightly difference, the p-values are similar in 
 >When sCa level was also considered, the difference of sMg was not significant among groups (F=2.09, p=0.126), age (F=0.23, p=0.636), and BMI(F=2.29, p=0.131), while sCa showed significance (F=8.23, p=0.004).
 
 ```{r}
-m3 <- aov(data = data3, log(MAGNESIU)~ AGE*BMI+OP+ CALCIUM)
+m3 <- lm(data = data3, log(MAGNESIU)~ AGE*BMI+OP+ CALCIUM)
 car::Anova(m3,type="2")
 ```
 F scores are also slightly shifts, but the pattern is similar. and p values and significants match with the paper. 
@@ -398,13 +398,14 @@ Compared to the table 3, our results onlt slightly differ in 3 decimal place on 
 
 # 4. Conclusion
 The paper's conclusion is that
+
 >High content of sMg and potentially low content of sCa could be a feature of the serum profile of elderly Chinese women with OP, the clinical significance of which needs further elucidation. Supplementation of Mg for elderly Chinese women with OP did not appear to be necessary (Wang et al, 2005).
 
 According to our replicate statistic tests, the statistic in this paper is accurate, match to their original data set.
 
 For ANOVA and post-hoc test, the replicated results is the same with the paper statistic in text and tables.  
 
-For the different F scores in ANCOVA, the data of sMg and sCa are not normally distributed. we use log() but the authors may use differnwet methods to make the data normally distributed. Also, the ANCOVA have different types, the authors may use different type of algorithm for ANCOVA. It may also because that author use other models(we use linear model in replicated assignment). Since it is 14 years ago, the author(my father) cannnot recall the memory of doing statistic. 
+For the different F scores in ANCOVA, the data of sMg and sCa are not normally distributed. we use log() but the authors may use different methods to make the data normally distributed. Also, the ANCOVA have different types, the authors may use different type of algorithm for ANCOVA. It may also because that author use other models(we use linear model in replicated assignment). Since it is 14 years ago, the author(my father) cannnot recall the memory of doing statistic. 
 
 For the slight different in Partial Correlation, the reason may because thepaper use SAS software to analysis all the statistic test. The Algorithm between R and SAS might have slightly difference. Also, the paper didn't states which model and which type of partial correlation test they use, which can also cause the difference in our results. 
 
